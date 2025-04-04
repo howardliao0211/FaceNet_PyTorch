@@ -1,8 +1,5 @@
-"""This module was imported from liorshk's 'facenet_pytorch' github repository:
-        https://github.com/liorshk/facenet_pytorch/blob/master/LFWDataset.py
-
-    It was modified to support lfw .png files for loading by using the code here:
-        https://github.com/davidsandberg/facenet/blob/master/src/lfw.py#L46
+"""This module was imported from tamerthamoqa's 'facenet-pytorch-glint360k' github repository:
+        https://github.com/tamerthamoqa/facenet-pytorch-glint360k/blob/master/datasets/LFWDataset.py
 """
 
 """MIT License
@@ -28,10 +25,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE."""
 
 
+from typing import Tuple
 import torchvision.datasets as datasets
+from torch.utils.data import DataLoader, Subset
 import os
 import numpy as np
-
+import torch
+import random
 
 class LFWDataset(datasets.ImageFolder):
     def __init__(self, dir, pairs_path, transform=None):
@@ -100,11 +100,35 @@ class LFWDataset(datasets.ImageFolder):
             """
 
             img = self.loader(img_path)
-            return self.transform(img)
+            return self.transform(img) if self.transform else img
 
-        (path_1, path_2, issame) = self.validation_images[index]
-        img1, img2 = transform(path_1), transform(path_2)
-        return img1, img2, issame
+        if isinstance(index, slice):
+            res = []
+            for path_1, path_2, issame in self.validation_images[index]:
+                img1, img2 = transform(path_1), transform(path_2)
+                res.append((img1, img2, issame))
+            return res
+        else:
+            (path_1, path_2, issame) = self.validation_images[index]
+            img1, img2 = transform(path_1), transform(path_2)
+            return img1, img2, issame
 
     def __len__(self):
         return len(self.validation_images)
+
+def get_dataloader(dir, pairs_path, transform=None, val_percent=10, batch_size=32) -> Tuple[DataLoader, DataLoader]:
+    dataset = LFWDataset(dir=dir, pairs_path=pairs_path)
+    
+    # Split the dataset into training and validation sets
+    dataset_size = len(dataset)
+    indices = list(range(dataset_size))
+    random.shuffle(indices)
+    sample_size = int(dataset_size * (val_percent / 100))
+
+    valid_dataset = Subset(dataset, indices[:sample_size])
+    train_dataset = Subset(dataset, indices[sample_size:])
+    
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=4)
+    valid_loader = DataLoader(valid_dataset, batch_size=batch_size, shuffle=False, num_workers=4)
+
+    return train_loader, valid_loader
