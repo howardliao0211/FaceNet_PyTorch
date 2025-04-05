@@ -117,7 +117,7 @@ def get_dataloader(dir: str, transform=transforms.ToTensor(), val_percent=10, ba
     valid_dataset = Subset(dataset, indices[:sample_size])
     train_dataset = Subset(dataset, indices[sample_size:])
     
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=4)
-    valid_loader = DataLoader(valid_dataset, batch_size=batch_size, shuffle=False, num_workers=4)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=2)
+    valid_loader = DataLoader(valid_dataset, batch_size=batch_size, shuffle=False, num_workers=2)
 
     return train_loader, valid_loader

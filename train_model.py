@@ -31,5 +31,6 @@ if __name__ == "__main__":
     train_loader, test_loader = get_dataloader(dir=LFW_DIR, batch_size=64)
     optimizer = torch.optim.SGD(model.parameters(), lr=0.001)
 
-    losses = train_loop(model, train_loader, optimizer, triplet_loss, device=device)
-    graph_loss({'Train Loss': losses})
+    for epoch in range(10):
+        print(f"Epoch {epoch+1}/{10}")
+        train_loop(model, train_loader, optimizer, triplet_loss, device=device)
