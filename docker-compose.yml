@@ -1,0 +1,12 @@
+version: '3.4'
+
+services:
+  facenetpytorch:
+    image: facenetpytorch
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    volumes:
+      - .:/app
+    command:
+     - python train_model.py
