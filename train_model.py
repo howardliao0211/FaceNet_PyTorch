@@ -18,14 +18,18 @@ class TestModel(nn.Module):
         return l2
 
 if __name__ == "__main__":
-    LFW_DIR = r'Data\lfw_224.zip'
+    LFW_DIR = r'./Data/lfw_224.zip'
+
+    # Define your device
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # model = TestModel()
     model = MiniFaceNet()
     # model = FaceNet()
 
+    model.to(device)
     train_loader, test_loader = get_dataloader(dir=LFW_DIR, batch_size=64)
     optimizer = torch.optim.SGD(model.parameters(), lr=0.001)
 
-    losses = train_loop(model, train_loader, optimizer, triplet_loss)
+    losses = train_loop(model, train_loader, optimizer, triplet_loss, device=device)
     graph_loss({'Train Loss': losses})

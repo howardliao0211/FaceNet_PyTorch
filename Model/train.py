@@ -11,7 +11,7 @@ def triplet_loss(anchor, positive, negative, margin=0.2):
     return loss
 
 
-def train_loop(model, dataloader, optimizer, loss_fn, margin=0.2):
+def train_loop(model, dataloader, optimizer, loss_fn, margin=0.2, device='cpu'):
     """
     Perform one training loop over the dataset.
     """
@@ -19,6 +19,8 @@ def train_loop(model, dataloader, optimizer, loss_fn, margin=0.2):
     
     losses = []
     for batch, (anchor, positive, negative) in enumerate(dataloader):
+        anchor, positive, negative = anchor.to(device), positive.to(device), negative.to(device)
+
         mini_batch = torch.cat((anchor, positive, negative), dim=0)
         embeddings = model(mini_batch)  # shape: [3 * batch_size, embedding_dim]
 
