@@ -38,19 +38,22 @@ class TripletDataset(datasets.ImageFolder):
         triplet_dataset = []
 
         for label, images in label_dict.items():
+            
+            # Create a copy of the images list to avoid modifying the original list
+            cur_images = images[:]
 
             # Need at least 2 images for anchor and positive
-            while len(images) >= 2:
+            while len(cur_images) >= 2:
 
                 # Randomly select an anchor and positive image from the same label
-                anchor, positive = random.sample(images, 2)
+                anchor, positive = random.sample(cur_images, 2)
                 negative_label = random.choice([l for l in label_dict.keys() if l != label and len(label_dict[l]) > 0])
                 negative = random.choice(label_dict[negative_label])
 
                 triplet_dataset.append((anchor, positive, negative))
 
-                images.remove(anchor)
-                images.remove(positive)
+                cur_images.remove(anchor)
+                cur_images.remove(positive)
 
         return triplet_dataset
 
