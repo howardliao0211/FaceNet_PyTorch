@@ -24,8 +24,8 @@ if __name__ == "__main__":
     model = MiniFaceNet()
     # model = FaceNet()
 
-    train_loader, test_loader = get_dataloader(dir=LFW_DIR)
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+    train_loader, test_loader = get_dataloader(dir=LFW_DIR, batch_size=64)
+    optimizer = torch.optim.SGD(model.parameters(), lr=0.001)
 
     losses = train_loop(model, train_loader, optimizer, triplet_loss)
     graph_loss({'Train Loss': losses})
