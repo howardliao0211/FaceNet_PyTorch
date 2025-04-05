@@ -19,9 +19,16 @@ def train_loop(model, dataloader, optimizer, loss_fn, margin=0.2):
     
     losses = []
     for batch, (anchor, positive, negative) in enumerate(dataloader):
-        # Forward pass
-        anchor_loss, positive_loss, negative_loss = model(anchor), model(positive), model(negative)
-        loss = loss_fn(anchor_loss, positive_loss, negative_loss, margin)
+        mini_batch = torch.cat((anchor, positive, negative), dim=0)
+        embeddings = model(mini_batch)  # shape: [3 * batch_size, embedding_dim]
+
+        # Split the embeddings back
+        batch_size = anchor.size(0)
+        anchor_out = embeddings[:batch_size]
+        positive_out = embeddings[batch_size:2*batch_size]
+        negative_out = embeddings[2*batch_size:]
+
+        loss = loss_fn(anchor_out, positive_out, negative_out, margin)
         
         # Backward pass & optimization
         optimizer.zero_grad()
@@ -31,6 +38,6 @@ def train_loop(model, dataloader, optimizer, loss_fn, margin=0.2):
         if batch % 10 == 0:
             losses.append(loss.item())
             index = (batch + 1) * dataloader.batch_size
-            print(f'    loss: {loss.item(): 5f} ----- {index: 6d} / {len(dataloader.dataset)}')
+            print(f'    loss: {loss.item(): 8.3f} ----- {index: 6d} / {len(dataloader.dataset)}')
     
     return losses

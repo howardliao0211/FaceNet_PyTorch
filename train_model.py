@@ -2,11 +2,30 @@ from Model import FaceNet, MiniFaceNet, train_loop, triplet_loss
 from Data.data import get_dataloader
 from Trainers.trainers import graph_loss
 import torch
+from torch import nn
+
+class TestModel(nn.Module):
+    def __init__(self):
+        super(TestModel, self).__init__()
+        self.net = nn.Sequential(
+            nn.Flatten(),
+            nn.LazyLinear(128)
+        )
+
+    def forward(self, x):
+        x = self.net(x)
+        l2 = torch.sqrt(x**2)
+        return l2
 
 if __name__ == "__main__":
-    model = FaceNet()
-    train_loader, test_loader = get_dataloader(dir=r'Data\lfw_224')
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+    LFW_DIR = r'Data\lfw_224.zip'
+
+    # model = TestModel()
+    model = MiniFaceNet()
+    # model = FaceNet()
+
+    train_loader, test_loader = get_dataloader(dir=LFW_DIR, batch_size=64)
+    optimizer = torch.optim.SGD(model.parameters(), lr=0.001)
 
     losses = train_loop(model, train_loader, optimizer, triplet_loss)
     graph_loss({'Train Loss': losses})

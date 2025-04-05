@@ -5,16 +5,36 @@ import torch
 import random
 from collections import defaultdict
 from pathlib import Path
+import os
+import zipfile
 
 class TripletDataset(datasets.ImageFolder):
     def __init__(self, dir: str, transform=None):
 
-        super(TripletDataset, self).__init__(dir, transform)
+        if dir.endswith('.zip'):
+            if not os.path.exists(dir[:-4]):
+                dir = self.extract_zip(dir)
+            else:
+                dir = dir[:-4]  # Remove .zip extension for folder name
+        elif not os.path.isdir(dir):
+            raise ValueError(f"Directory {dir} is not a zip or directory.")
+
+        super(TripletDataset, self).__init__(dir)
 
         self.transform = transform
         self.label_dict = self.create_label_dict(dir)
         self.validation_images = self.create_triplet_dataset(self.label_dict)
 
+    def extract_zip(self, zip_path: str) -> str:
+        """
+        Extracts a zip file to a temporary directory and returns the path to the extracted folder.
+        """
+        extracted_dir = Path(zip_path).with_suffix('')  # Remove .zip extension for folder name
+        if not extracted_dir.exists():
+            with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+                zip_ref.extractall(extracted_dir.parent)
+        return str(extracted_dir)
+    
     def create_label_dict(self, dir: str) -> dict[str, list]:
         """
         Create a dictionary of labels and their corresponding image paths.
