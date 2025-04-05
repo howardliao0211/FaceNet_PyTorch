@@ -1,13 +1,12 @@
+from Model import FaceNet, MiniFaceNet, train_loop, triplet_loss
 from Data.data import get_dataloader
-from Util.graph import show_image_pairs
-from torchvision import transforms
-from torch.utils.data import DataLoader
+from Trainers.trainers import graph_loss
+import torch
 
-LFW_DIR_PATH = r'Data\lfw_224'
-PAIRS_PATH = r'Data\lfw_pairs.txt'
+if __name__ == "__main__":
+    model = FaceNet()
+    train_loader, test_loader = get_dataloader(dir=r'Data\lfw_224')
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
-if __name__ == '__main__':
-    train_loader, test_loader = get_dataloader(dir=LFW_DIR_PATH, pairs_path=PAIRS_PATH, transform=transforms.ToTensor())
-    print(f"Train loader: {len(train_loader.dataset)}, Test loader: {len(test_loader.dataset)}")
-
-    
+    losses = train_loop(model, train_loader, optimizer, triplet_loss)
+    graph_loss({'Train Loss': losses})
