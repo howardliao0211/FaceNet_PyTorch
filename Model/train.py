@@ -47,8 +47,8 @@ def test_loop(model, dataloader, loss_fn, margin=0.2, device='cpu', distance_thr
     model.eval()
 
     test_loss = 0.0
-    val_rate = 0.0
-    far_rate = 0.0
+    true_accepts = 0
+    false_accepts = 0
 
     with torch.no_grad():
         for anchor, positive, negative in dataloader:
@@ -67,19 +67,12 @@ def test_loop(model, dataloader, loss_fn, margin=0.2, device='cpu', distance_thr
             
             # Calculate validation rate and false accept rate
             positive_distance = F.pairwise_distance(anchor_out, positive_out)
-            true_accepts = positive_distance < distance_threshold
+            true_accepts += (positive_distance < distance_threshold).sum()
 
             negative_distance = F.pairwise_distance(anchor_out, negative_out).mean()
-            false_accepts = negative_distance > distance_threshold
-
-            validation_rate = true_accepts.sum() / len(batch_size)
-            false_accept_rate = false_accepts.sum() / len(batch_size)
-
-            # Accumulate rates
-            val_rate += validation_rate.item()
-            far_rate += false_accept_rate.item()
+            false_accepts += (negative_distance < distance_threshold).sum()
 
     test_loss /= len(dataloader)
-    val_rate /= len(dataloader)
-    far_rate /= len(dataloader)
+    val_rate = true_accepts.item() / (len(dataloader) * dataloader.batch_size)
+    far_rate = false_accepts.item() / (len(dataloader) * dataloader.batch_size)
     print(f'Test loss: {test_loss: 8.3f}. Validation rate: {val_rate: 5.3f}, False accept rate: {far_rate: 5.3f}')
