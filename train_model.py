@@ -1,4 +1,5 @@
-from Model import FaceNet, MiniFaceNet, train_loop, triplet_loss
+import torch.optim.adadelta
+from Model import FaceNet, MiniFaceNet, train_loop, test_loop, triplet_loss
 from Data.data import get_dataloader
 from Trainers.trainers import graph_loss
 from torch import nn
@@ -37,6 +38,9 @@ if __name__ == "__main__":
     train_loader, test_loader = get_dataloader(dir=LFW_DIR, batch_size=64)
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
-    for epoch in range(10):
+    for epoch in range(30):
         print(f"Epoch {epoch+1}/{10}")
         train_loop(model, train_loader, optimizer, triplet_loss, device=device)
+        test_loop(model, test_loader, triplet_loss, device=device)
+
+    torch.save(model, 'facenet_pytorch.pkl')
