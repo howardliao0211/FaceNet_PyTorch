@@ -47,6 +47,9 @@ def test_loop(model, dataloader, loss_fn, margin=0.2, device='cpu'):
     model.eval()
 
     test_loss = 0.0
+    anchor_emb = 0.0
+    positive_emb = 0.0
+    negative_emb = 0.0
 
     with torch.no_grad():
         for anchor, positive, negative in dataloader:
@@ -62,5 +65,12 @@ def test_loop(model, dataloader, loss_fn, margin=0.2, device='cpu'):
 
             loss = loss_fn(anchor_out, positive_out, negative_out, margin)
             test_loss += loss.item()
+            anchor_emb += anchor_out.mean().item()
+            positive_emb += positive_out.mean().item()
+            negative_emb += negative_out.mean().item()
 
-    print(f'Test loss: {test_loss / len(dataloader): 8.5f}')
+    test_loss /= len(dataloader)
+    anchor_emb /= len(dataloader)
+    positive_emb /= len(dataloader)
+    negative_emb /= len(dataloader)
+    print(f'Test loss: {test_loss: 8.5f}. anchor: {anchor_emb: 8.5f}, positive: {positive_emb: 8.5f}, negative: {negative_emb: 8.5f}')
