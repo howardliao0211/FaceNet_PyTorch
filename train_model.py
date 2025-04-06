@@ -26,8 +26,8 @@ if __name__ == "__main__":
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # model = TestModel()
-    model = MiniFaceNet()
-    # model = FaceNet()
+    # model = MiniFaceNet()
+    model = FaceNet()
 
     model.to(device)
     transform = transforms.Compose([
