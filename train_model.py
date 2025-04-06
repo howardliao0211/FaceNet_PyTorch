@@ -1,8 +1,10 @@
 from Model import FaceNet, MiniFaceNet, train_loop, triplet_loss
 from Data.data import get_dataloader
 from Trainers.trainers import graph_loss
-import torch
 from torch import nn
+from torchvision import transforms
+from Util.graph import show_triplet_img
+import torch
 
 class TestModel(nn.Module):
     def __init__(self):
@@ -28,8 +30,12 @@ if __name__ == "__main__":
     # model = FaceNet()
 
     model.to(device)
+    transform = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
+    ])
     train_loader, test_loader = get_dataloader(dir=LFW_DIR, batch_size=64)
-    optimizer = torch.optim.SGD(model.parameters(), lr=0.001)
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
     for epoch in range(10):
         print(f"Epoch {epoch+1}/{10}")
