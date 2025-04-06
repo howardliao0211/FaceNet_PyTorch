@@ -38,8 +38,9 @@ if __name__ == "__main__":
     train_loader, test_loader = get_dataloader(dir=LFW_DIR, batch_size=64)
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
-    for epoch in range(30):
-        print(f"Epoch {epoch+1}/{10}")
+    epochs = 30
+    for epoch in range(epochs):
+        print(f"Epoch {epoch+1}/{epochs}")
         train_loop(model, train_loader, optimizer, triplet_loss, device=device)
         test_loop(model, test_loader, triplet_loss, device=device)
 

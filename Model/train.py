@@ -49,7 +49,7 @@ def test_loop(model, dataloader, loss_fn, margin=0.2, device='cpu'):
     test_loss = 0.0
 
     with torch.no_grad():
-        for anchor, positive, negative in enumerate(dataloader):
+        for anchor, positive, negative in dataloader:
             anchor, positive, negative = anchor.to(device), positive.to(device), negative.to(device)
 
             batch_size = anchor.size(0)
