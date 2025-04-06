@@ -43,13 +43,12 @@ def train_loop(model, dataloader, optimizer, loss_fn, margin=0.2, device='cpu'):
     
     return losses
 
-def test_loop(model, dataloader, loss_fn, margin=0.2, device='cpu'):
+def test_loop(model, dataloader, loss_fn, margin=0.2, device='cpu', distance_threshold=1.1):
     model.eval()
 
     test_loss = 0.0
-    anchor_emb = 0.0
-    positive_emb = 0.0
-    negative_emb = 0.0
+    val_rate = 0.0
+    far_rate = 0.0
 
     with torch.no_grad():
         for anchor, positive, negative in dataloader:
@@ -65,12 +64,22 @@ def test_loop(model, dataloader, loss_fn, margin=0.2, device='cpu'):
 
             loss = loss_fn(anchor_out, positive_out, negative_out, margin)
             test_loss += loss.item()
-            anchor_emb += anchor_out.mean().item()
-            positive_emb += positive_out.mean().item()
-            negative_emb += negative_out.mean().item()
+            
+            # Calculate validation rate and false accept rate
+            positive_distance = F.pairwise_distance(anchor_out, positive_out)
+            true_accepts = positive_distance < distance_threshold
+
+            negative_distance = F.pairwise_distance(anchor_out, negative_out).mean()
+            false_accepts = negative_distance > distance_threshold
+
+            validation_rate = true_accepts.sum() / len(batch_size)
+            false_accept_rate = false_accepts.sum() / len(batch_size)
+
+            # Accumulate rates
+            val_rate += validation_rate.item()
+            far_rate += false_accept_rate.item()
 
     test_loss /= len(dataloader)
-    anchor_emb /= len(dataloader)
-    positive_emb /= len(dataloader)
-    negative_emb /= len(dataloader)
-    print(f'Test loss: {test_loss: 8.5f}. anchor: {anchor_emb: 8.5f}, positive: {positive_emb: 8.5f}, negative: {negative_emb: 8.5f}')
+    val_rate /= len(dataloader)
+    far_rate /= len(dataloader)
+    print(f'Test loss: {test_loss: 8.3f}. Validation rate: {val_rate: 5.3f}, False accept rate: {far_rate: 5.3f}')
