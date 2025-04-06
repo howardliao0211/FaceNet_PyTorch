@@ -62,10 +62,10 @@ class FaceNet(nn.Module):
         x = self.body4(x)
         x = self.body5(x)
         x = self.head(x)
-        l2 = torch.sqrt(x**2)
-        return l2
+        x = F.normalize(x, p=2, dim=0)
+        return x
 
-class MiniFaceNet(nn.Module):
+class MiniFaceNet(FaceNet):
     def __init__(self):
         super(MiniFaceNet, self).__init__()
 
@@ -102,15 +102,6 @@ class MiniFaceNet(nn.Module):
             nn.Flatten(),
             nn.LazyLinear(128),
         )
-    
-    def forward(self, x):
-        x = self.stem(x)
-        x = self.body3(x)
-        x = self.body4(x)
-        x = self.body5(x)
-        x = self.head(x)
-        l2 = torch.sqrt(x**2)
-        return l2
 
 if __name__ == '__main__':
     model = MiniFaceNet()
