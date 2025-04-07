@@ -69,7 +69,7 @@ def test_loop(model, dataloader, loss_fn, margin=0.2, device='cpu', distance_thr
             positive_distance = F.pairwise_distance(anchor_out, positive_out)
             true_accepts += (positive_distance < distance_threshold).sum().item()
 
-            negative_distance = F.pairwise_distance(anchor_out, negative_out).mean()
+            negative_distance = F.pairwise_distance(anchor_out, negative_out)
             false_accepts += (negative_distance < distance_threshold).sum().item()
 
     test_loss /= len(dataloader)
