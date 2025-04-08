@@ -1,14 +1,21 @@
 import torch.nn.functional as F
 import torch
 
-def triplet_loss(anchor, positive, negative, margin=0.2):
+def semi_negative_triplet_loss(anchor, positive, negative, margin=0.2):
     """
     Triplet loss function.
     """
-    pos_dist = F.pairwise_distance(anchor, positive)
-    neg_dist = F.pairwise_distance(anchor, negative)
-    loss = torch.mean(F.relu(pos_dist - neg_dist + margin))
-    return loss
+    pos_dist = torch.square(F.pairwise_distance(anchor, positive))
+    neg_dist = torch.square(F.pairwise_distance(anchor, negative))
+    semi_hard_negative_mask = (pos_dist < neg_dist)
+
+    loss = F.relu(pos_dist - neg_dist + margin)
+    semi_hard_loss = loss[semi_hard_negative_mask]
+
+    if semi_hard_loss.numel():
+        return semi_hard_loss.mean()
+    else:
+        return torch.tensor(0.0, requires_grad=True).to(anchor.device)
 
 def train_loop(model, dataloader, optimizer, loss_fn, margin=0.2, device='cpu'):
     """
