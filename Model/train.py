@@ -15,7 +15,7 @@ def semi_negative_triplet_loss(anchor, positive, negative, margin=0.2):
     if semi_hard_loss.numel():
         return semi_hard_loss.mean()
     else:
-        return loss.mean()
+        return None
 
 def train_loop(model, dataloader, optimizer, loss_fn, margin=0.2, device='cpu'):
     """
@@ -37,6 +37,8 @@ def train_loop(model, dataloader, optimizer, loss_fn, margin=0.2, device='cpu'):
         negative_out = embeddings[2*batch_size:]
 
         loss = loss_fn(anchor_out, positive_out, negative_out, margin)
+        if loss is None:
+            continue
         
         # Backward pass & optimization
         optimizer.zero_grad()
