@@ -24,7 +24,7 @@ def triplet_loss(anchor, positive, negative, margin=0.2):
     pos_dist = F.pairwise_distance(anchor, positive)
     neg_dist = F.pairwise_distance(anchor, negative)
     loss = F.relu(pos_dist - neg_dist + margin)
-    return loss
+    return loss.mean()
 
 def train_loop(model, dataloader, optimizer, loss_fn, margin=0.2, device='cpu'):
     """
