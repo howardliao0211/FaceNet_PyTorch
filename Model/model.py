@@ -62,7 +62,8 @@ class FaceNet(nn.Module):
         x = self.body4(x)
         x = self.body5(x)
         x = self.head(x)
-        x = F.normalize(x, p=2, dim=0)
+        x = x.reshape(x.shape[0], -1)
+        x = F.normalize(x, p=2, dim=1)
         return x
 
 class MiniFaceNet(FaceNet):
