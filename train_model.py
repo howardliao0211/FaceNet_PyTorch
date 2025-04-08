@@ -1,5 +1,5 @@
 import torch.optim.adadelta
-from Model import FaceNet, MiniFaceNet, train_loop, test_loop, semi_negative_triplet_loss
+from Model import FaceNet, MiniFaceNet, train_loop, test_loop, semi_negative_triplet_loss, triplet_loss
 from Data.data import get_dataloader
 from Trainers.trainers import graph_loss
 from torch import nn
@@ -36,12 +36,12 @@ if __name__ == "__main__":
         transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
     ])
     train_loader, test_loader = get_dataloader(dir=LFW_DIR, batch_size=64)
-    optimizer = torch.optim.Adagrad(model.parameters(), lr=0.05)
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.05)
 
     epochs = 50
     for epoch in range(epochs):
         print(f"Epoch {epoch+1}/{epochs}")
         train_loop(model, train_loader, optimizer, semi_negative_triplet_loss, device=device)
-        test_loop(model, test_loader, semi_negative_triplet_loss, device=device)
+        test_loop(model, test_loader, triplet_loss, device=device)
 
     torch.save(model, 'facenet_pytorch.pkl')

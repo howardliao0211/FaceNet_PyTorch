@@ -17,6 +17,15 @@ def semi_negative_triplet_loss(anchor, positive, negative, margin=0.2):
     else:
         return None
 
+def triplet_loss(anchor, positive, negative, margin=0.2):
+    """
+    Triplet loss function.
+    """
+    pos_dist = F.pairwise_distance(anchor, positive)
+    neg_dist = F.pairwise_distance(anchor, negative)
+    loss = F.relu(pos_dist - neg_dist + margin)
+    return loss
+
 def train_loop(model, dataloader, optimizer, loss_fn, margin=0.2, device='cpu'):
     """
     Perform one training loop over the dataset.
