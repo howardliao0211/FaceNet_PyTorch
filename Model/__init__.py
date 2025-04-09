@@ -1,2 +1,2 @@
-from .model import FaceNet, MiniFaceNet
+from .model import FaceNet, MiniFaceNet, InceptionResnetV1
 from .train import train_loop, test_loop, semi_negative_triplet_loss, triplet_loss

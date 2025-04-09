@@ -1,5 +1,5 @@
 import torch.optim.adadelta
-from Model import FaceNet, MiniFaceNet, train_loop, test_loop, semi_negative_triplet_loss, triplet_loss
+from Model import *
 from Data.data import get_dataloader
 from Trainers.trainers import graph_loss
 from torch import nn
@@ -28,7 +28,8 @@ if __name__ == "__main__":
 
     # model = TestModel()
     # model = MiniFaceNet()
-    model = FaceNet()
+    # model = FaceNet()
+    model = InceptionResnetV1()
 
     model.to(device)
     transform = transforms.Compose([
