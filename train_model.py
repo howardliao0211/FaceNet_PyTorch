@@ -69,5 +69,5 @@ if __name__ == "__main__":
             'loss': test_loss,
             'val': val_rate,
             'far': far_rate,
-        }, get_model_file_path(model_dir, model_name, epoch))
+        }, get_model_file_path(model_dir, model_name, epoch+1))
 
