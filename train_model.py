@@ -36,9 +36,14 @@ if __name__ == "__main__":
     model = FaceNet()
 
     if args.load_checkpoint:
-        checkpoint = torch.load(args.load_checkpoint)
+        checkpoint = torch.load(args.load_checkpoint, map_location='cpu')
         model.load_state_dict(checkpoint['model_state_dict'])
+
         print(f"Checkpoint loaded from {args.load_checkpoint}")
+        for key, value in checkpoint.items():
+            if key == 'model_state_dict':
+                continue
+            print(f'{key}: {value}')
     else:
         print("No checkpoint specified. Initializing model from scratch.")
 
