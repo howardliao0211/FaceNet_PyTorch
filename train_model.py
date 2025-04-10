@@ -5,6 +5,8 @@ from Trainers.trainers import graph_loss
 from torch import nn
 from torchvision import transforms
 from Util.graph import show_triplet_img
+from pathlib import Path
+import datetime
 import torch
 
 class TestModel(nn.Module):
@@ -19,6 +21,18 @@ class TestModel(nn.Module):
         x = self.net(x)
         l2 = torch.sqrt(x**2)
         return l2
+
+def get_model_file_path(dir: str, model_name: str, epoch=None) -> str:
+    model_directory = Path(dir)
+    model_directory.mkdir(parents=True, exist_ok=True)
+    date = datetime.datetime.now().strftime("%Y_%m_%d")
+
+    if epoch:
+        model_file_name = f'{model_name}_epoch{epoch}_{date}.pt'
+    else:
+        model_file_name = f'{model_name}_{date}.pt'
+
+    return str(model_directory/model_file_name)
 
 if __name__ == "__main__":
     LFW_DIR = r'./Data/lfw_224.zip'
@@ -38,10 +52,22 @@ if __name__ == "__main__":
     train_loader, test_loader = get_dataloader(dir=LFW_DIR, batch_size=64)
     optimizer = torch.optim.Adam(model.parameters(), lr=0.05)
 
-    epochs = 5
+    model_dir = Path(r'./Checkpoints')
+    model_name = 'FaceNet_ResNeXt'
+    model_file_path = get_model_file_path(model_dir, model_name)
+
+    epochs = 20
     for epoch in range(epochs):
         print(f"Epoch {epoch+1}/{epochs}")
         train_loop(model, train_loader, optimizer, semi_negative_triplet_loss, device=device)
-        test_loop(model, test_loader, triplet_loss, device=device)
+        test_loss, val_rate, far_rate = test_loop(model, test_loader, triplet_loss, device=device)
+        
+        # Record Check Point
+        torch.save({
+            'epoch': epoch,
+            'model_state_dict': model.state_dict(),
+            'loss': test_loss,
+            'val': val_rate,
+            'far': far_rate,
+        }, get_model_file_path(model_dir, model_name, epoch))
 
-    # torch.save(model, 'facenet_pytorch.pkl')

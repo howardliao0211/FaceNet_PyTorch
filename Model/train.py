@@ -94,3 +94,5 @@ def test_loop(model, dataloader, loss_fn, margin=0.2, device='cpu', distance_thr
     val_rate = true_accepts / (len(dataloader) * dataloader.batch_size)
     far_rate = false_accepts / (len(dataloader) * dataloader.batch_size)
     print(f'Test loss: {test_loss: 8.3f}. Validation rate: {val_rate: 5.3f}, False accept rate: {far_rate: 5.3f}')
+
+    return test_loss, val_rate, far_rate
