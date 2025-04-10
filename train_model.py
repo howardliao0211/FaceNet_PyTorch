@@ -6,43 +6,41 @@ from torch import nn
 from torchvision import transforms
 from Util.graph import show_triplet_img
 from pathlib import Path
+import argparse
 import datetime
 import torch
-
-class TestModel(nn.Module):
-    def __init__(self):
-        super(TestModel, self).__init__()
-        self.net = nn.Sequential(
-            nn.Flatten(),
-            nn.LazyLinear(128)
-        )
-
-    def forward(self, x):
-        x = self.net(x)
-        l2 = torch.sqrt(x**2)
-        return l2
 
 def get_model_file_path(dir: str, model_name: str, epoch=None) -> str:
     model_directory = Path(dir)
     model_directory.mkdir(parents=True, exist_ok=True)
-    date = datetime.datetime.now().strftime("%Y_%m_%d")
+    date = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
 
     if epoch:
-        model_file_name = f'{model_name}_epoch{epoch}_{date}.pt'
+        model_file_name = f'{model_name}_{date}_epoch{epoch}.pt'
     else:
         model_file_name = f'{model_name}_{date}.pt'
 
     return str(model_directory/model_file_name)
 
 if __name__ == "__main__":
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--load_checkpoint', type=str, default=None)
+    args = parser.parse_args()
+
     LFW_DIR = r'./Data/lfw_224.zip'
 
     # Define your device
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    # model = TestModel()
-    # model = MiniFaceNet()
     model = FaceNet()
+
+    if args.load_checkpoint:
+        checkpoint = torch.load(args.load_checkpoint)
+        model.load_state_dict(checkpoint['model_state_dict'])
+        print(f"Checkpoint loaded from {args.load_checkpoint}")
+    else:
+        print("No checkpoint specified. Initializing model from scratch.")
 
     model.to(device)
     transform = transforms.Compose([
