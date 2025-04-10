@@ -47,8 +47,8 @@ class FaceNet(nn.Module):
         )
     
     def block(self, channel: int, use_1x1conv: bool=False, halve_dim: bool=False) -> nn.Module:
-        groups: int=8
-        bot_mul: float=1
+        groups: int=32
+        bot_mul: float=0.5
         
         if halve_dim:
             return ResNeXtBlock(channel, groups, bot_mul, use_1x1conv, strides=2)
