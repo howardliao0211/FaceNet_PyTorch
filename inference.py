@@ -3,6 +3,7 @@ import torch.nn.functional as F
 from PIL import Image
 from torchvision import transforms
 from Util import show_triplet_img
+from Model import *
 
 def load_image(image_path: str) -> torch.Tensor:
     image = Image.open(image_path).convert("RGB")
@@ -31,7 +32,9 @@ if __name__ == "__main__":
     positive_path = r"Data\lfw_224\Adam_Sandler\Adam_Sandler_0003.jpg"
     negative_path = r"Data\lfw_224\Abdel_Madi_Shabneh\Abdel_Madi_Shabneh_0001.jpg"
 
-    model = torch.load(model_path, weights_only=False, map_location='cpu')
+    model = FaceNet()
+    checkpoint = torch.load(r'Checkpoints\FaceNet_ResNeXt_20250410_170040_epoch16.pt', map_location='cpu')
+    model.load_state_dict(checkpoint['model_state_dict'])
     model.eval()
 
     anchor_image = load_image(anchor_path)
