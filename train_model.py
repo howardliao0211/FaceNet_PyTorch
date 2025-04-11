@@ -16,6 +16,8 @@ def get_model_file_path(dir: str, model_name: str, epoch=None) -> str:
     model_directory = Path(dir) / date
     model_directory.mkdir(parents=True, exist_ok=True)
 
+    print(f'Checkpoint Directory: {str(model_directory)}')
+
     if epoch:
         model_file_name = f'{model_name}_epoch{epoch}.pt'
     else:
