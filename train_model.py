@@ -11,12 +11,17 @@ import argparse
 import datetime
 import torch
 
-def get_model_file_path(dir: str, model_name: str, epoch=None) -> str:
+def get_checkpoint_dir(dir: str) -> str:
     date = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     model_directory = Path(dir) / date
     model_directory.mkdir(parents=True, exist_ok=True)
 
     print(f'Checkpoint Directory: {str(model_directory)}')
+    return str(model_directory)
+
+def get_checkpoint_path(dir: str, model_name: str, epoch=None) -> str:
+    model_directory = Path(dir)
+    model_directory.mkdir(parents=True, exist_ok=True)
 
     if epoch:
         model_file_name = f'{model_name}_epoch{epoch}.pt'
@@ -74,9 +79,8 @@ if __name__ == "__main__":
             param_group['lr'] = args.lr
 
     # Actual Training. 
-    model_dir = Path(r'./Checkpoints')
     model_name = 'FaceNet_ResNeXt'
-    model_file_path = get_model_file_path(model_dir, model_name)
+    checkpoint_dir = get_checkpoint_dir(r'./Checkpoints')
 
     epochs = args.epochs
     for epoch in range(epochs):
@@ -92,5 +96,5 @@ if __name__ == "__main__":
             'loss': test_loss,
             'val': val_rate,
             'far': far_rate,
-        }, get_model_file_path(model_dir, model_name, epoch + 1))
+        }, get_checkpoint_path(checkpoint_dir, model_name, epoch + 1))
 
