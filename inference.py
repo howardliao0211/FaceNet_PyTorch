@@ -40,7 +40,6 @@ def is_same_face(model: torch.nn.Module, image1: torch.Tensor, image2: torch.Ten
 if __name__ == "__main__":
     
     # Load Model. 
-    model_path = r"Trained_Models\Baseline_FaceNet.pkl"
     LFW_DIR = r'./Data/lfw_224.zip'
     _, test_loader = get_dataloader(LFW_DIR, transform=None, val_percent=10, batch_size=64)
 
