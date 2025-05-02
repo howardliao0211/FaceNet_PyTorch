@@ -56,8 +56,10 @@ if __name__ == "__main__":
     optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
 
     # Load checkpoint if given. 
+    trained_epoch = 0
     if args.load_checkpoint:
         checkpoint: dict[str, Any] = torch.load(args.load_checkpoint, map_location=device)
+        trained_epoch = checkpoint['epoch']
         model.load_state_dict(checkpoint['model_state_dict'])
         optimizer_state_dict = checkpoint.get('optimizer_state_dict')
 
@@ -89,12 +91,13 @@ if __name__ == "__main__":
         test_loss, val_rate, far_rate = test_loop(model, test_loader, triplet_loss, device=device)
         
         # Record Check Point
+        total_trained_epoch = trained_epoch + epoch + 1
         torch.save({
-            'epoch': epoch + 1,
+            'epoch': total_trained_epoch,
             'model_state_dict': model.state_dict(),
             'optimizer_state_dict': optimizer.state_dict(),
             'loss': test_loss,
             'val': val_rate,
             'far': far_rate,
-        }, get_checkpoint_path(checkpoint_dir, model_name, epoch + 1))
+        }, get_checkpoint_path(checkpoint_dir, model_name, total_trained_epoch))
 
