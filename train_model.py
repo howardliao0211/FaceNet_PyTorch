@@ -1,15 +1,34 @@
 import torch.optim.adadelta
 from Model import *
 from Data import get_dataloader
-from Trainers.trainers import graph_loss
 from torch import nn
 from torchvision import transforms
 from Util.graph import show_triplet_img
 from pathlib import Path
 from typing import Any
+from trainers.core import BaseTrainer
 import argparse
 import datetime
 import torch
+
+class FacenetTrainer(BaseTrainer):
+
+    def train_loop(self):
+        return train_loop(
+            model=self.model,
+            dataloader=self.train_loader,
+            optimizer=self.optimizer,
+            loss_fn=self.loss_fn,
+            device=self.device
+        )
+
+    def test_loop(self):
+        return test_loop(
+            model=self.model,
+            dataloader=self.test_loader,
+            loss_fn=self.loss_fn,
+            device=self.device
+        )
 
 def get_checkpoint_dir(dir: str) -> str:
     date = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -81,23 +100,14 @@ if __name__ == "__main__":
             param_group['lr'] = args.lr
 
     # Actual Training. 
-    model_name = 'FaceNet_ResNeXt'
-    checkpoint_dir = get_checkpoint_dir(r'./Checkpoints')
+    trainer = FacenetTrainer(
+        name='Facenet',
+        model=model,
+        optimizer=optimizer,
+        loss_fn=triplet_loss,
+        train_loader=train_loader,
+        test_loader=test_loader,
+        device=device
+    )
 
-    epochs = args.epochs
-    for epoch in range(epochs):
-        print(f"Epoch {epoch+1}/{epochs}")
-        train_loop(model, train_loader, optimizer, semi_negative_triplet_loss, device=device)
-        test_loss, val_rate, far_rate = test_loop(model, test_loader, triplet_loss, device=device)
-        
-        # Record Check Point
-        total_trained_epoch = trained_epoch + epoch + 1
-        torch.save({
-            'epoch': total_trained_epoch,
-            'model_state_dict': model.state_dict(),
-            'optimizer_state_dict': optimizer.state_dict(),
-            'loss': test_loss,
-            'val': val_rate,
-            'far': far_rate,
-        }, get_checkpoint_path(checkpoint_dir, model_name, total_trained_epoch))
-
+    trainer.fit(args.epochs, trained_epochs=trained_epoch, graph=True, save_check_point=False)

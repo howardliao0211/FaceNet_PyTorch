@@ -32,7 +32,8 @@ def train_loop(model, dataloader, optimizer, loss_fn, margin=0.2, device='cpu'):
     """
     model.train()
     
-    losses = []
+    train_loss = 0.0
+
     for batch, (anchor, positive, negative) in enumerate(dataloader):
         anchor, positive, negative = anchor.to(device), positive.to(device), negative.to(device)
 
@@ -55,11 +56,11 @@ def train_loop(model, dataloader, optimizer, loss_fn, margin=0.2, device='cpu'):
         optimizer.step()
 
         if batch % 10 == 0:
-            losses.append(loss.item())
+            train_loss += loss.item()
             index = (batch + 1) * dataloader.batch_size
             print(f'    loss: {loss.item(): 8.5f} ----- {index: 6d} / {len(dataloader.dataset)}')
     
-    return losses
+    return train_loss / len(dataloader.dataset)
 
 def test_loop(model, dataloader, loss_fn, margin=0.2, device='cpu', distance_threshold=1.1):
     model.eval()
@@ -95,4 +96,4 @@ def test_loop(model, dataloader, loss_fn, margin=0.2, device='cpu', distance_thr
     far_rate = false_accepts / (len(dataloader) * dataloader.batch_size)
     print(f'Test loss: {test_loss: 8.3f}. Validation rate: {val_rate: 5.3f}, False accept rate: {far_rate: 5.3f}')
 
-    return test_loss, val_rate, far_rate
+    return test_loss
