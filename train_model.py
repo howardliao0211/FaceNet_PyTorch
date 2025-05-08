@@ -18,7 +18,7 @@ class FacenetTrainer(BaseTrainer):
             model=self.model,
             dataloader=self.train_loader,
             optimizer=self.optimizer,
-            loss_fn=self.loss_fn,
+            loss_fn=semi_negative_triplet_loss,
             device=self.device
         )
 
@@ -26,7 +26,7 @@ class FacenetTrainer(BaseTrainer):
         return test_loop(
             model=self.model,
             dataloader=self.test_loader,
-            loss_fn=self.loss_fn,
+            loss_fn=triplet_loss,
             device=self.device
         )
 
@@ -104,7 +104,7 @@ if __name__ == "__main__":
         name='Facenet',
         model=model,
         optimizer=optimizer,
-        loss_fn=triplet_loss,
+        loss_fn=None, # train and test loop have different loss function. 
         train_loader=train_loader,
         test_loader=test_loader,
         device=device
