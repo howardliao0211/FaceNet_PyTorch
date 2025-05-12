@@ -60,7 +60,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # The filepath of the dataset. Consists of ~4000 dataset of anchor, positive, and negative. 
-    LFW_DIR = r'Data\lfw_224'
+    LFW_DIR = r'Data\lfw_224.zip'
 
     # Get the device of the current environment.
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

@@ -63,7 +63,7 @@ if __name__ == "__main__":
     print(f'Current device: {device}')
 
     # Load Model.
-    LFW_DIR = r'Data\lfw_224'
+    LFW_DIR = r'Data\lfw_224.zip'
     checkpoint_path = find_checkpoint_highest_val(r'./Checkpoints')
     _, test_loader = get_dataloader(LFW_DIR, transform=None, val_percent=10, batch_size=64)
 
