@@ -60,7 +60,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # The filepath of the dataset. Consists of ~4000 dataset of anchor, positive, and negative. 
-    LFW_DIR = r'Data\lfw-deepfunneled'
+    LFW_DIR = r'Data\lfw_224'
 
     # Get the device of the current environment.
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -95,7 +95,7 @@ if __name__ == "__main__":
 
     # Actual Training. 
     trainer = FacenetTrainer(
-        name='Facenet',
+        name='Facenet_LFW_224',
         model=model,
         optimizer=optimizer,
         loss_fn=None, # train and test loop have different loss function. 

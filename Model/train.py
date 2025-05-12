@@ -32,6 +32,7 @@ def train_loop(model, dataloader, optimizer, loss_fn, margin=0.2, device='cpu'):
     """
     model.train()
     
+    train_statistic = {}
     train_loss = 0.0
     train_total = 0
 
@@ -62,11 +63,13 @@ def train_loop(model, dataloader, optimizer, loss_fn, margin=0.2, device='cpu'):
         if batch % 10 == 0:
             print(f'    loss: {loss.item(): 8.5f} ----- {train_total: 6d} / {len(dataloader.dataset)}')
     
-    return train_loss / train_total
+    train_statistic['Train Loss'] = train_loss / train_total
+    return train_statistic
 
 def test_loop(model, dataloader, loss_fn, margin=0.2, device='cpu', distance_threshold=1.1):
     model.eval()
 
+    test_statistic = {}
     test_loss = 0.0
     true_accepts = 0.0
     false_accepts = 0.0
@@ -93,9 +96,14 @@ def test_loop(model, dataloader, loss_fn, margin=0.2, device='cpu', distance_thr
             negative_distance = F.pairwise_distance(anchor_out, negative_out)
             false_accepts += (negative_distance < distance_threshold).sum().item()
 
+
     test_loss /= len(dataloader)
     val_rate = true_accepts / (len(dataloader) * dataloader.batch_size)
     far_rate = false_accepts / (len(dataloader) * dataloader.batch_size)
     print(f'Test loss: {test_loss: 8.3f}. Validation rate: {val_rate: 5.3f}, False accept rate: {far_rate: 5.3f}')
 
-    return test_loss
+    test_statistic['Test Loss'] = test_loss
+    test_statistic['Validation Rate'] = val_rate
+    test_statistic['False Accept Rate'] = far_rate
+
+    return test_statistic
