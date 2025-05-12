@@ -29,22 +29,28 @@ def postprocess_embedding(embeddging1: torch.Tensor, embedding2: torch.Tensor) -
     x = x.item()
     return x
 
-def is_same_face(model: torch.nn.Module, image1: torch.Tensor, image2: torch.Tensor, threshold: float) -> bool:
+def is_same_face(model: torch.nn.Module, image1: torch.Tensor, image2: torch.Tensor, threshold: float) -> tuple[bool, float]:
     image1, image2 = preprocess_image(image1), preprocess_image(image2)
 
     with torch.no_grad():
         embedding1, embedding2 = model(image1), model(image2)
     
-    return postprocess_embedding(embedding1, embedding2) < threshold
+    dist = postprocess_embedding(embedding1, embedding2)
+    
+    return dist < threshold, dist
 
 if __name__ == "__main__":
     
-    # Load Model. 
-    LFW_DIR = r'./Data/lfw_224.zip'
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(f'Current device: {device}')
+
+    # Load Model.
+    LFW_DIR = r'Data\lfw-deepfunneled'
+    CHECKPOINT_PATH = r'Checkpoints\Facenet\20250512\Facenet_epoch825_20250512_100502.pt'
     _, test_loader = get_dataloader(LFW_DIR, transform=None, val_percent=10, batch_size=64)
 
     model = FaceNet()
-    checkpoint: dict[str] = torch.load(r'Checkpoints\20250411_115256\FaceNet_ResNeXt_epoch20.pt', map_location='cpu')
+    checkpoint: dict[str] = torch.load(CHECKPOINT_PATH, map_location=device)
     model.load_state_dict(checkpoint['model_state_dict'])
     model.eval()
 
@@ -67,11 +73,11 @@ if __name__ == "__main__":
         test_answer.append(choice == 1)
     
     # Create prediction. 
-    embedding_threshold = 1.1
+    embedding_threshold = 1.0
     test_pred = []
     for test in test_images:
-        pred = is_same_face(model, test[0], test[1], embedding_threshold)
-        test_pred.append(pred)
+        pred, dist = is_same_face(model, test[0], test[1], embedding_threshold)
+        test_pred.append((pred, dist))
 
     # Plot results
     plt.figure()
@@ -86,7 +92,7 @@ if __name__ == "__main__":
         plt.subplot(data_to_inference, 2, 2*i + 2)
         plt.imshow(test_images[i][1])
         plt.axis('off')
-        plt.title(f'Pred: {test_pred[i]}')
+        plt.title(f'Pred: {test_pred[i][0]} ({test_pred[i][1]:.3f})')
 
     plt.tight_layout()
     plt.show()

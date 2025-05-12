@@ -72,7 +72,6 @@ class TripletDataset(datasets.ImageFolder):
 
                 triplet_dataset.append((anchor, positive, negative))
 
-                cur_images.remove(anchor)
                 cur_images.remove(positive)
 
         return triplet_dataset
@@ -105,7 +104,7 @@ class TripletDataset(datasets.ImageFolder):
     def __len__(self):
         return len(self.validation_images)
 
-def get_dataloader(dir: str, transform=transforms.ToTensor(), val_percent=10, batch_size=32) -> Tuple[DataLoader, DataLoader]:
+def get_dataloader(dir: str, transform, val_percent=10, batch_size=32) -> Tuple[DataLoader, DataLoader]:
     dataset = TripletDataset(dir=dir, transform=transform)
     
     # Split the dataset into training and validation sets

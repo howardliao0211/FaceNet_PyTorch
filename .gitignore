@@ -1,3 +1,5 @@
 /.venv/*
 *.jpg
 *.pyc
+/Checkpoints/
+/Data/*.zip

@@ -1,4 +1,5 @@
 import torch.optim.adadelta
+import trainers.utils
 from Model import *
 from Data import get_dataloader
 from torch import nn
@@ -7,6 +8,7 @@ from Util.graph import show_triplet_img
 from pathlib import Path
 from typing import Any
 from trainers.core import BaseTrainer
+import trainers
 import argparse
 import datetime
 import torch
@@ -53,12 +55,12 @@ if __name__ == "__main__":
     # Create parser object to parse user argument.
     parser = argparse.ArgumentParser()
     parser.add_argument('--load_checkpoint', type=str, default=None)
-    parser.add_argument('--lr', type=float, default=None)
+    parser.add_argument('--lr', type=float, default=1e-3)
     parser.add_argument('--epochs', type=int, default=20)
     args = parser.parse_args()
 
     # The filepath of the dataset. Consists of ~4000 dataset of anchor, positive, and negative. 
-    LFW_DIR = r'./Data/lfw_224.zip'
+    LFW_DIR = r'Data\lfw-deepfunneled'
 
     # Get the device of the current environment.
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -69,35 +71,27 @@ if __name__ == "__main__":
     model.to(device)
     transform = transforms.Compose([
         transforms.ToTensor(),
+        transforms.Resize((224, 224)),
         transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
     ])
-    train_loader, test_loader = get_dataloader(dir=LFW_DIR, batch_size=64)
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
+    train_loader, test_loader = get_dataloader(dir=LFW_DIR, transform=transform, batch_size=64)
+    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
 
     # Load checkpoint if given. 
     trained_epoch = 0
     if args.load_checkpoint:
-        checkpoint: dict[str, Any] = torch.load(args.load_checkpoint, map_location=device)
-        trained_epoch = checkpoint['epoch']
-        model.load_state_dict(checkpoint['model_state_dict'])
-        optimizer_state_dict = checkpoint.get('optimizer_state_dict')
-
-        if optimizer_state_dict:
-            optimizer.load_state_dict(optimizer_state_dict)
-
-        print(f"Checkpoint loaded from {args.load_checkpoint}")
-        for key, value in checkpoint.items():
-            if key.endswith('state_dict'):
-                continue
-            print(f'{key}: {value}')
+        checkpoint = trainers.utils.load_checkpoint(checkpoint_path=args.load_checkpoint,
+                                                     model=model,
+                                                     optimizer=optimizer,
+                                                     device=device)
+        trained_epoch = checkpoint.get('epoch', 0)
     else:
         print("No checkpoint specified. Initializing model from scratch.")
     
     # Load learning rate for the optimizer. 
-    if args.lr:
-        print(f'Loading learning rate from argument. lr={args.lr}')
-        for param_group in optimizer.param_groups:
-            param_group['lr'] = args.lr
+    print(f'Loading learning rate from argument. lr={args.lr}')
+    for param_group in optimizer.param_groups:
+        param_group['lr'] = args.lr
 
     # Actual Training. 
     trainer = FacenetTrainer(
@@ -110,4 +104,4 @@ if __name__ == "__main__":
         device=device
     )
 
-    trainer.fit(args.epochs, trained_epochs=trained_epoch, graph=True, save_check_point=False)
+    trainer.fit(args.epochs, trained_epochs=trained_epoch, graph=True, save_check_point=True)

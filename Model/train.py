@@ -60,8 +60,7 @@ def train_loop(model, dataloader, optimizer, loss_fn, margin=0.2, device='cpu'):
         train_total += batch_size
 
         if batch % 10 == 0:
-            index = (batch + 1) * dataloader.batch_size
-            print(f'    loss: {loss.item(): 8.5f} ----- {index: 6d} / {len(dataloader.dataset)}')
+            print(f'    loss: {loss.item(): 8.5f} ----- {train_total: 6d} / {len(dataloader.dataset)}')
     
     return train_loss / train_total
 
