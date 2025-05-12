@@ -2,6 +2,8 @@ import torch
 import torch.nn.functional as F
 import random
 import matplotlib.pyplot as plt
+import os
+from pathlib import Path
 from PIL import Image
 from torchvision import transforms
 from Util import show_triplet_img
@@ -39,18 +41,34 @@ def is_same_face(model: torch.nn.Module, image1: torch.Tensor, image2: torch.Ten
     
     return dist < threshold, dist
 
-if __name__ == "__main__":
+def find_checkpoint_highest_val(checkpoint_dir: str) -> str:
+
+    checkpoints = {}
+    for path in Path(checkpoint_dir).rglob('*'):
+        if path.is_file() and str(path).endswith('.pt'):
+            checkpoint = torch.load(str(path))
+            checkpoints[path] = checkpoint
     
+    checkpoint_with_highest_val = max(
+        checkpoints.items(),
+        key=lambda checkpoint: checkpoint[1]['Validation Rate']
+    )
+    
+    return str(checkpoint_with_highest_val[0])
+
+if __name__ == "__main__":
+
+
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f'Current device: {device}')
 
     # Load Model.
     LFW_DIR = r'Data\lfw_224'
-    CHECKPOINT_PATH = r'Checkpoints\Facenet_LFW_224\20250512\Facenet_LFW_224_epoch413_20250512_165632.pt'
+    checkpoint_path = find_checkpoint_highest_val(r'./Checkpoints')
     _, test_loader = get_dataloader(LFW_DIR, transform=None, val_percent=10, batch_size=64)
 
     model = FaceNet()
-    checkpoint: dict[str] = torch.load(CHECKPOINT_PATH, map_location=device)
+    checkpoint: dict[str] = torch.load(checkpoint_path, map_location=device)
     model.load_state_dict(checkpoint['model_state_dict'])
     model.eval()
 
