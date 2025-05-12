@@ -14,3 +14,14 @@
 
 ## Update (2025_0414)
     After implementing the ResNeXt block, the model is successfully learning the feature. 
+
+## Update (2025_0512)
+    In the previous implementation, the code for creating the dataset is written in a way that the number of dataset would be less than the number of possible dataset because the dataset is removing both anchor and positive image from the available images. Yet, by only remove either anchor or positive image, we can create a new dataset. By fixing the mechanism for creating the dataset, the number of possible dataset increase from ~4000 to ~6000. The increase in dataset significanly improve the training of the model. Below is the current progress of the model:
+    """
+    epoch: 413
+    Train Loss: 3.614705325905654e-06
+    Test Loss: 0.058307219917575516
+    Validation Rate: 0.9166666666666666
+    False Accept Rate: 0.3450520833333333
+    """
+    Before fixing the dataset, the validation rate and false accept rate is around 75% and 40%, respectively.

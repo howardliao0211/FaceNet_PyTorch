@@ -45,8 +45,8 @@ if __name__ == "__main__":
     print(f'Current device: {device}')
 
     # Load Model.
-    LFW_DIR = r'Data\lfw-deepfunneled'
-    CHECKPOINT_PATH = r'Checkpoints\Facenet\20250512\Facenet_epoch825_20250512_100502.pt'
+    LFW_DIR = r'Data\lfw_224'
+    CHECKPOINT_PATH = r'Checkpoints\Facenet_LFW_224\20250512\Facenet_LFW_224_epoch413_20250512_165632.pt'
     _, test_loader = get_dataloader(LFW_DIR, transform=None, val_percent=10, batch_size=64)
 
     model = FaceNet()
@@ -73,7 +73,7 @@ if __name__ == "__main__":
         test_answer.append(choice == 1)
     
     # Create prediction. 
-    embedding_threshold = 1.0
+    embedding_threshold = 1.1
     test_pred = []
     for test in test_images:
         pred, dist = is_same_face(model, test[0], test[1], embedding_threshold)
