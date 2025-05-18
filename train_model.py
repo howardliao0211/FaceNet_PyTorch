@@ -8,6 +8,7 @@ from Util.graph import show_triplet_img
 from pathlib import Path
 from typing import Any
 from trainers.core import BaseTrainer
+import random
 import trainers
 import argparse
 import datetime
@@ -52,6 +53,9 @@ def get_checkpoint_path(dir: str, model_name: str, epoch=None) -> str:
     return str(model_directory/model_file_name)
 
 if __name__ == "__main__":
+    # Specify the random seed so that train and test dataset will always be the same.
+    random.seed(42)
+
     # Create parser object to parse user argument.
     parser = argparse.ArgumentParser()
     parser.add_argument('--load_checkpoint', type=str, default=None)
