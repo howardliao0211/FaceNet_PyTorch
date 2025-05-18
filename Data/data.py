@@ -9,7 +9,7 @@ import os
 import zipfile
 
 class TripletDataset(datasets.ImageFolder):
-    def __init__(self, dir: str, transform=None):
+    def __init__(self, dir: str, transform=None, random_seed=42):
 
         if dir.endswith('.zip'):
             if not os.path.exists(dir[:-4]):
@@ -24,6 +24,9 @@ class TripletDataset(datasets.ImageFolder):
         self.transform = transform
         self.label_dict = self.create_label_dict(dir)
         self.validation_images = self.create_triplet_dataset(self.label_dict)
+
+        # Specify the random seed so that the created test and valid set will always be the same. 
+        random.seed(random_seed)
 
     def extract_zip(self, zip_path: str) -> str:
         """
